@@ -1,0 +1,15 @@
+django>3.2,<3.3
+python-decouple
+Pillow
+djangorestframework
+django-filter
+markdown
+djangorestframework-simplejwt
+drf-yasg[validation]
+coreapi
+django-mail-templated
+pytest
+pytest-django
+Faker
+black
+flake8

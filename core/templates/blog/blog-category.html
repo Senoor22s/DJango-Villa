@@ -1,0 +1,13 @@
+{% load static %} 
+    <ul class="properties-filter">
+        <li>
+           <a href="{% url 'blog:posts' %}" data-filter="*">Show All</a>
+        </li>
+        {% for cat in categories %}
+        <li>
+        <a
+         href="{% url 'blog:category' cat_name=cat.name %}"
+         data-filter=".{{ cat.name }}">{{ cat.name }}</a>
+        </li>
+        {% endfor %}
+    </ul>
