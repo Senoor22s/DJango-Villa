@@ -1,12 +1,11 @@
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly,IsAuthenticated
 from rest_framework import viewsets
-from .serializers import PostSerializer
-from ...models import Post
+from .serializers import PostSerializer,CategorySerializer
+from ...models import Post,Category
 from .permissions import IsAuthorOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .paginations import DefaultPagination
 from .filters import PostFilter
 
 
@@ -19,4 +18,8 @@ class PostViewSet(viewsets.ModelViewSet):
     search_fields = ["title", "content"]
     filterset_class = PostFilter
     ordering_fields = ["created_date"]
-    pagination_class = DefaultPagination
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthorOrReadOnly]
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()

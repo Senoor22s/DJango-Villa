@@ -1,15 +1,21 @@
-from django.views.generic import ListView
+from django.views.generic import ListView,TemplateView
 from django.views.generic.detail import DetailView
 from .models import Post
 from comment.models import Comment
 from comment.forms import CommentForm
 from django.views.generic.edit import FormMixin
 from django.urls import reverse
+from django.shortcuts import redirect
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from urllib.parse import urlencode
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
+class PostListAPIView(TemplateView):
+    template_name='blog/post_list_api.html'
 
+@method_decorator(cache_page(60), name='dispatch')
 class PostList(ListView):
     model = Post
     template_name = "post_list.html"
@@ -22,9 +28,9 @@ class PostList(ListView):
         if cat_name:
             posts = posts.filter(category__name=cat_name)
         return posts.order_by("-published_date")
+    
 
-
-class PostDetail(LoginRequiredMixin, FormMixin, DetailView):
+class PostDetail(FormMixin, DetailView):
     model = Post
     template_name = "post_detail.html"
     context_object_name = "post"
@@ -56,3 +62,12 @@ class PostDetail(LoginRequiredMixin, FormMixin, DetailView):
         obj.counted_view = obj.counted_view + 1
         obj.save(update_fields=["counted_view"])
         return obj
+    
+    
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.login_require and not request.user.is_authenticated:
+            current_url = request.get_full_path()
+            login_url = f"{reverse('accounts:login')}?{urlencode({'next': current_url})}"
+            return redirect(login_url)
+        return super().dispatch(request, *args, **kwargs)

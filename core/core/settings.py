@@ -50,11 +50,13 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "mail_templated",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -165,3 +167,25 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+CORS_ALLOW_ALL_ORIGINS= True
+
+CELERY_BROKER_URL='redis://redis:6379/1'
+
+CELERY_BEAT_SCHEDULE = {
+    'delete-contacts-every-30-minutes': {
+        'task': 'comment.tasks.delete_all_contacts',
+        'schedule': 1800,
+    },
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        }
+    }
+}
+

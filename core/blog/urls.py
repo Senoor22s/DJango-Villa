@@ -8,4 +8,5 @@ urlpatterns = [
     path("post/<int:pk>", views.PostDetail.as_view(), name="post-detail"),
     path("Category/<str:cat_name>", views.PostList.as_view(), name="category"),
     path("api/v1/", include("blog.api.v1.urls", namespace="api-v1")),
+    path("posts/api/", views.PostListAPIView.as_view(), name="posts-api"),
 ]
