@@ -5,7 +5,7 @@ from comment.models import Comment
 from comment.forms import CommentForm
 from django.views.generic.edit import FormMixin
 from django.urls import reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect,get_object_or_404
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from urllib.parse import urlencode
@@ -36,6 +36,22 @@ class PostDetail(FormMixin, DetailView):
     context_object_name = "post"
     form_class = CommentForm
 
+    def dispatch(self, request, *args, **kwargs):
+
+        obj = get_object_or_404(Post, pk=kwargs.get('pk'))
+        if obj.login_require and not request.user.is_authenticated:
+            current_url = request.get_full_path()
+            login_url = f"{reverse('accounts:login')}?{urlencode({'next': current_url})}"
+            return redirect(login_url)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+
+        obj.counted_view = obj.counted_view + 1
+        obj.save(update_fields=["counted_view"])
+        return obj
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["comments"] = Comment.objects.filter(post=self.object, approved=True)
@@ -51,23 +67,8 @@ class PostDetail(FormMixin, DetailView):
             comment.save()
             messages.success(request, "Submitted")
             return HttpResponseRedirect(self.get_success_url())
-        messages.error(request, "Something went wrnog")
+        messages.error(request, "Something went wrong")
         return self.form_invalid(form)
 
     def get_success_url(self):
         return reverse("blog:post-detail", kwargs={"pk": self.object.pk})
-
-    def get_object(self, queryset=None):
-        obj = super().get_object(queryset)
-        obj.counted_view = obj.counted_view + 1
-        obj.save(update_fields=["counted_view"])
-        return obj
-    
-    
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        if self.object.login_require and not request.user.is_authenticated:
-            current_url = request.get_full_path()
-            login_url = f"{reverse('accounts:login')}?{urlencode({'next': current_url})}"
-            return redirect(login_url)
-        return super().dispatch(request, *args, **kwargs)

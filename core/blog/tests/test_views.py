@@ -41,6 +41,7 @@ def test_post_detail_redirects_not_logged_in(client):
         content="CT",
         author=user,
         status=True,
+        login_require=True,
         published_date=timezone.now(),
     )
     post.category.add(cat)
