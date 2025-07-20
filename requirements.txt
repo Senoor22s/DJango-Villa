@@ -18,3 +18,8 @@ celery
 redis
 django-redis
 gunicorn
+django-extensions
+django-robots
+django-debug-toolbar
+django-summernote
+django-simple-captcha

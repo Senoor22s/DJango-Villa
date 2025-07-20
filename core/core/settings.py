@@ -51,6 +51,13 @@ INSTALLED_APPS = [
     "django_filters",
     "mail_templated",
     "corsheaders",
+    'django_extensions',
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
+    'robots',
+    'debug_toolbar',
+    'django_summernote',
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +69,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -189,3 +197,31 @@ CACHES = {
     }
 }
 
+SITE_ID = 3
+
+ROBOTS_USE_HOST = False
+ROBOTS_USE_SITEMAP = False
+
+INTERNAL_IPS = [
+    '127.0.0.1'
+]
+X_FRAME_OPTIONS='SAMEORIGIN'
+
+SUMMERNOTE_CONFIG={
+    'iframe':True,
+    'summernote':{
+        'airmode':False,
+        'width':'300%',
+        'height':'480',
+        'toolbar': [
+            ['style',['style']],
+            ['font',['bold','underline','clear']],
+            ['fontname',['fontname']],
+            ['color',['color']],
+            ['para',['ul','ol','paragraph']],
+            ['table',['table']],
+            ['insert',['link','picture','video']],
+            ['view',['fullscreen','codeview','help']],
+        ],
+    },
+}

@@ -56,7 +56,7 @@
             <h6>| Contact Us</h6>
             <h2>Get In Touch With Our Agents</h2>
           </div>
-          <p>When you really need to download free CSS templates, please remember our website TemplateMo. Also, tell your friends about our website. Thank you for visiting. There is a variety of Bootstrap HTML CSS templates on our website. If you need more information, please contact us.</p>
+          <p>Dictum varius duis at consectetur lorem. Nisi vitae suscipit tellus mauris a diam maecenas sed enim. Velit ut tortor pretium viverra suspendisse potenti nullam. Et molestie ac feugiat sed lectus. Non nisi est sit amet facilisis magna. Dignissim diam quis enim lobortis scelerisque fermentum. Odio ut enim blandit volutpat maecenas volutpat. Ornare lectus sit amet est placerat in egestas erat. Nisi vitae suscipit tellus mauris a diam maecenas sed. Placerat duis ultricies lacus sed turpis tincidunt id aliquet.</p>
           <div class="row">
             <div class="col-lg-12">
               <div class="item phone">
@@ -106,7 +106,26 @@
                 </fieldset>
               </div>
             </div>
+            <div class="col-lg-12">
+            <fieldset style="margin-top: 15px;">
+              <label for="id_captcha_1" style="display: block; margin-bottom: 8px; font-weight: 500;"></label>
+              <div style="
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 10px;
+                background-color: #4993b0ff;
+                transform: scale(0.8);
+                transform-origin: top left;
+              ">
+                {{ form.captcha }}
+              </div>
+            </fieldset>
+          </div>
           </form>
+
           {% if messages %}
           <div class="mt-4">
             {% for message in messages %}
@@ -121,4 +140,5 @@
       </div>
     </div>
   </div>
+
   {% endblock %}
