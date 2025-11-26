@@ -27,6 +27,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import jwt
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 User = get_user_model()
 
@@ -43,7 +45,7 @@ class RegistrationAPIView(GenericAPIView):
         user_obj = get_object_or_404(User, email=email)
         token = self.get_tokens_for_user(user_obj)
         email_obj = EmailMessage(
-            "email/activation.tpl", {"token": token}, "test@test.com", [email]
+            "email/activation.tpl", {"token": token}, settings.DEFAULT_FROM_EMAIL, [email]
         )
         EmailThread(email_obj).start()
         return Response(data, status=status.HTTP_201_CREATED)
@@ -55,7 +57,7 @@ class RegistrationAPIView(GenericAPIView):
 
 class CustomObtainAuthToken(ObtainAuthToken):
     serializer_class = CustomAuthTokenSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = CustomAuthTokenSerializer(
@@ -85,7 +87,7 @@ class CustomDiscardAuthToken(APIView):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
 
 class ChangePasswordAPIView(GenericAPIView):
@@ -123,9 +125,8 @@ class ChangePasswordAPIView(GenericAPIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class ActivationAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def get(self, request, token, *args, **kwargs):
         try:
             token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
@@ -146,6 +147,7 @@ class ActivationAPIView(APIView):
         return Response({"detail": "your account has been verified successfully"})
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ActivationResendAPIView(GenericAPIView):
     serializer_class = ActivationResendSerializer
     permission_classes = [IsAuthenticated]
@@ -156,7 +158,7 @@ class ActivationResendAPIView(GenericAPIView):
         user_obj = serializer.validated_data["user"]
         token = self.get_tokens_for_user(user_obj)
         email_obj = EmailMessage(
-            "email/activation.tpl", {"token": token}, "test@test.com", [user_obj.email]
+            "email/activation.tpl", {"token": token}, settings.DEFAULT_FROM_EMAIL, [user_obj.email]
         )
         EmailThread(email_obj).start()
         return Response(
@@ -167,7 +169,7 @@ class ActivationResendAPIView(GenericAPIView):
         refresh = RefreshToken.for_user(user)
         return str(refresh.access_token)
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class ResetPasswordAPIView(GenericAPIView):
     serializer_class = ResetPasswordSerializer
     permission_classes = [AllowAny]
@@ -192,7 +194,7 @@ class ResetPasswordAPIView(GenericAPIView):
         email_obj = EmailMessage(
             "email/reset.tpl",
             {"token": token, "reset_link": reset_link},
-            "no-reply@example.com",
+            settings.DEFAULT_FROM_EMAIL,
             [email],
         )
         EmailThread(email_obj).start()
@@ -204,7 +206,6 @@ class ResetPasswordAPIView(GenericAPIView):
     def get_tokens_for_user(self, user):
         refresh = RefreshToken.for_user(user)
         return str(refresh.access_token)
-
 
 class ConfirmResetPasswordAPIView(GenericAPIView):
     serializer_class = ConfirmResetPasswordSerializer

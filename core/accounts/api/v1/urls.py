@@ -20,7 +20,7 @@ urlpatterns = [
     path("activation/resend", ActivationResendAPIView.as_view(), name="activation"),
     path("reset-password/", ResetPasswordAPIView.as_view(), name="reset-password"),
     path(
-        "reset-password/confirm/<str:token>/",
+        "reset-password/confirm/<str:token>",
         ConfirmResetPasswordAPIView.as_view(),
         name="confirm-reset-password",
     ),
