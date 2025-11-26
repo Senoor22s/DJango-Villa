@@ -11,14 +11,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(required=False, allow_null=True)
     snippet = serializers.ReadOnlyField(source="get_snippet")
     relative_url = serializers.URLField(source="get_absolute_api_url", read_only=True)
     absolute_url = serializers.SerializerMethodField()
     category = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(), many=True, write_only=True, required=False
     )
-    category_detail = CategorySerializer(source="category", many=True, read_only=True)
 
     class Meta:
         model = Post
@@ -30,10 +28,8 @@ class PostSerializer(serializers.ModelSerializer):
             "snippet",
             "status",
             "category",
-            "category_detail",
             "title",
             "price",
-            "login_require",
             "relative_url",
             "absolute_url",
             "created_date",
@@ -45,6 +41,18 @@ class PostSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         relative_url = reverse("blog:api-v1:posts-detail", kwargs={"pk": obj.id})
         return request.build_absolute_uri(relative_url)
+    
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        request=self.context.get('request')
+        if request.parser_context.get('kwargs').get('pk'):
+            rep.pop('snippet',None)
+            rep.pop('relative_url',None)
+            rep.pop('absolute_url',None)
+        else:
+            rep.pop('content',None)
+        rep['category']=CategorySerializer(instance.category.all(),many=True).data
+        return rep
 
     def create(self, validated_data):
         categories = validated_data.pop("category", [])

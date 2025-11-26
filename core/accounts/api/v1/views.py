@@ -55,7 +55,7 @@ class RegistrationAPIView(GenericAPIView):
 
 class CustomObtainAuthToken(ObtainAuthToken):
     serializer_class = CustomAuthTokenSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = CustomAuthTokenSerializer(
@@ -71,14 +71,21 @@ class CustomDiscardAuthToken(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        if not self.request.user.is_verified:
-            return Response({"detail": "user is not verified"})
-        request.user.auth_token.delete()
+        if not request.user.is_verified:
+            return Response({"detail": "user is not verified"}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            token = Token.objects.get(user=request.user)
+            token.delete()
+        except Token.DoesNotExist:
+            return Response({"detail": "User has no token"}, status=status.HTTP_400_BAD_REQUEST)
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class ChangePasswordAPIView(GenericAPIView):
@@ -118,6 +125,7 @@ class ChangePasswordAPIView(GenericAPIView):
 
 
 class ActivationAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, token, *args, **kwargs):
         try:
             token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
@@ -140,6 +148,7 @@ class ActivationAPIView(APIView):
 
 class ActivationResendAPIView(GenericAPIView):
     serializer_class = ActivationResendSerializer
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

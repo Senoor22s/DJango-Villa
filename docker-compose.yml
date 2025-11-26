@@ -1,13 +1,13 @@
 services:
     redis:
-        container_name: redis-3
+        container_name: redis-villa
         image: redis
         ports:
             - "6379:6379"
         command: redis-server --save 60 1 --loglevel warning
     backend:
         build: .
-        container_name: backend-3
+        container_name: backend-villa
         command: python manage.py runserver 0.0.0.0:8080
         volumes:
             - ./core:/app
